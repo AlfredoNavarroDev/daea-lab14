@@ -16,6 +16,7 @@ GO
 
 IF OBJECT_ID('dbo.CitaTatuaje', 'U') IS NOT NULL DROP TABLE dbo.CitaTatuaje;
 IF OBJECT_ID('dbo.Tatuador', 'U') IS NOT NULL DROP TABLE dbo.Tatuador;
+IF OBJECT_ID('dbo.Usuario', 'U') IS NOT NULL DROP TABLE dbo.Usuario;
 GO
 
 CREATE TABLE dbo.Tatuador (
@@ -50,6 +51,23 @@ CREATE INDEX IX_CitaTatuaje_TatuadorId ON dbo.CitaTatuaje (TatuadorId);
 GO
 
 -- =============================================================
+-- Usuario - cuentas de acceso a la API (autenticacion JWT, Semana 14)
+-- ClaveHash se completa con BCrypt: registrar por la API (rol por
+-- defecto "Recepcionista") y luego ajustar el rol con UPDATE.
+-- =============================================================
+
+CREATE TABLE dbo.Usuario (
+    Id         INT IDENTITY(1,1) NOT NULL,
+    Correo     NVARCHAR(150)     NOT NULL,
+    ClaveHash  NVARCHAR(200)     NOT NULL,
+    Rol        NVARCHAR(30)      NOT NULL,
+    CONSTRAINT PK_Usuario PRIMARY KEY (Id),
+    CONSTRAINT UQ_Usuario_Correo UNIQUE (Correo),
+    CONSTRAINT CK_Usuario_Rol CHECK (Rol IN ('Recepcionista', 'Tatuador'))
+);
+GO
+
+-- =============================================================
 -- Datos de ejemplo
 -- =============================================================
 
@@ -68,4 +86,11 @@ INSERT INTO dbo.CitaTatuaje (ClienteNombre, ClienteCorreo, FechaHora, Estimacion
     ('Andrea Vidal',    'andrea.vidal@mail.com',   '2026-11-22T11:00:00', 1.0, 25.00,  'Confirmada', 3),
     ('Ruben Ortega',    'ruben.ortega@mail.com',   '2026-11-18T16:00:00', 2.0, 35.00,  'Cancelada',  3),
     ('Sofia Carrasco',  'sofia.carrasco@mail.com', '2026-11-23T12:00:00', 5.0, 80.00,  'Pendiente',  1);
+GO
+
+-- Un usuario por rol para las pruebas de la Semana 14. El hash se obtiene
+-- registrando cada correo por POST api/auth/registro (clave de prueba,
+-- p.ej. "Clave123") y luego corriendo el UPDATE de abajo para fijar el rol.
+-- recepcion@tattoostudio.com    -> rol por defecto al registrarse: Recepcionista (sin UPDATE)
+-- artista@tattoostudio.com      -> UPDATE dbo.Usuario SET Rol = 'Tatuador' WHERE Correo = 'artista@tattoostudio.com';
 GO

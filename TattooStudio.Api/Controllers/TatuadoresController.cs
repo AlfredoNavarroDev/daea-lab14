@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TattooStudio.Entidades.Dtos;
 using TattooStudio.Negocio.Excepciones;
@@ -7,6 +8,7 @@ namespace TattooStudio.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class TatuadoresController : ControllerBase
 {
     private readonly ITatuadorService _tatuadorService;
@@ -55,6 +57,7 @@ public class TatuadoresController : ControllerBase
 
     // POST api/tatuadores
     [HttpPost]
+    [Authorize(Roles = "Recepcionista")]
     public async Task<ActionResult<TatuadorDto>> Crear([FromBody] TatuadorCrearDto dto)
     {
         if (!ModelState.IsValid)
@@ -68,6 +71,7 @@ public class TatuadoresController : ControllerBase
 
     // PUT api/tatuadores/5
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Recepcionista")]
     public async Task<IActionResult> Actualizar(int id, [FromBody] TatuadorActualizarDto dto)
     {
         if (!ModelState.IsValid)
@@ -93,6 +97,7 @@ public class TatuadoresController : ControllerBase
 
     // DELETE api/tatuadores/5 (baja logica: Activo = false)
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Recepcionista")]
     public async Task<IActionResult> Desactivar(int id)
     {
         try

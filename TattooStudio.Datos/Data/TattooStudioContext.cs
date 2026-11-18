@@ -16,6 +16,8 @@ public partial class TattooStudioContext : DbContext
 
     public virtual DbSet<Tatuador> Tatuadors { get; set; }
 
+    public virtual DbSet<Usuario> Usuarios { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<CitaTatuaje>(entity =>
@@ -45,6 +47,17 @@ public partial class TattooStudioContext : DbContext
             entity.Property(e => e.Activo).HasDefaultValue(true, "DF_Tatuador_Activo");
             entity.Property(e => e.Especialidad).HasMaxLength(50);
             entity.Property(e => e.Nombre).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.ToTable("Usuario");
+
+            entity.HasIndex(e => e.Correo, "UQ_Usuario_Correo").IsUnique();
+
+            entity.Property(e => e.Correo).HasMaxLength(150);
+            entity.Property(e => e.ClaveHash).HasMaxLength(200);
+            entity.Property(e => e.Rol).HasMaxLength(30);
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TattooStudio.Entidades.Dtos;
 using TattooStudio.Negocio.Excepciones;
@@ -7,6 +8,7 @@ namespace TattooStudio.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CitasTatuajeController : ControllerBase
 {
     private readonly ICitaTatuajeService _citaService;
@@ -39,6 +41,7 @@ public class CitasTatuajeController : ControllerBase
 
     // POST api/citastatuaje
     [HttpPost]
+    [Authorize(Roles = "Recepcionista")]
     public async Task<ActionResult<CitaTatuajeDto>> Crear([FromBody] CitaTatuajeCrearDto dto)
     {
         if (!ModelState.IsValid)
@@ -64,6 +67,7 @@ public class CitasTatuajeController : ControllerBase
 
     // PUT api/citastatuaje/5
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Recepcionista,Tatuador")]
     public async Task<IActionResult> Actualizar(int id, [FromBody] CitaTatuajeActualizarDto dto)
     {
         if (!ModelState.IsValid)
@@ -89,6 +93,7 @@ public class CitasTatuajeController : ControllerBase
 
     // DELETE api/citastatuaje/5
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Recepcionista")]
     public async Task<IActionResult> Eliminar(int id)
     {
         var eliminada = await _citaService.EliminarAsync(id);
