@@ -3,3 +3,4 @@ obj/
 .vs/
 *.user
 *.suo
+TattooStudio.Api/appsettings.Development.json
