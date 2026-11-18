@@ -8,6 +8,7 @@ Web API REST en 4 capas (`TattooStudio.Entidades` → `TattooStudio.Datos` → `
 |---|---|
 | [tatuadores](./tatuadores/) | CRUD de `Tatuador`, baja lógica, listado de citas de un tatuador (ruta anidada) |
 | [citas-tatuaje](./citas-tatuaje/) | CRUD de `CitaTatuaje`, regla de solapamiento de horarios |
+| [autenticacion](./autenticacion/) | Registro/login con JWT (`Usuario`), roles `Recepcionista`/`Tatuador`, configuración de `[Authorize]` consumida por `tatuadores` y `citas-tatuaje` |
 
 ## Infraestructura compartida
 
@@ -47,9 +48,11 @@ No usa `ReverseMap()` en ningún mapeo: las formas de lectura (agregan datos cal
 
 ### Autenticación
 
-No hay `[Authorize]` ni middleware de autenticación en ningún controlador (`Program.cs` no registra autenticación, solo `app.UseAuthorization()` sin esquema). Es intencional: el enunciado del laboratorio fija `Tipo de autenticación: Ninguno`.
+Desde la Semana 14, `Program.cs` registra `AddAuthentication` + `AddJwtBearer` (esquema por defecto `JwtBearer`, valida emisor/audiencia/firma/expiración contra la sección `Jwt` de `appsettings.json`) y `AddAuthorization()`; el pipeline llama `app.UseAuthentication()` antes de `app.UseAuthorization()`. `TatuadoresController` y `CitasTatuajeController` llevan `[Authorize]` a nivel de clase (cualquier rol autenticado para los `GET`) y `[Authorize(Roles = "...")]` en sus acciones de escritura. Ver [autenticacion](./autenticacion/) para el detalle completo (registro, login, emisión del JWT, y la brecha de que el rol `Tatuador` no está atado a un `Tatuador.Id` puntual).
 
 ## Known gaps
 
-- No hay un manejador global de excepciones: solo `ReglaNegocioException` se traduce a una respuesta controlada (409); cualquier otra excepción no capturada (p. ej. una falla de conexión a SQL Server, o una violación de `CHECK` que llegara a disparar `DbUpdateException`) se propaga como `500` sin cuerpo estructurado.
+- No hay un manejador global de excepciones: solo `ReglaNegocioException` se traduce a una respuesta controlada (409); cualquier otra excepción no capturada (p. ej. una falla de conexión a SQL Server, una violación de `CHECK` que llegara a disparar `DbUpdateException`, o un correo duplicado en un registro concurrente — ver `autenticacion/dudas-recurrentes.md`) se propaga como `500` sin cuerpo estructurado.
 - No existen pruebas automatizadas (unitarias o de integración) en la solución — no hay carpeta de tests ni proyecto `*.Tests`.
+- El rol `Tatuador` es global, no está asociado a un `Tatuador.Id`: `[Authorize(Roles = "Recepcionista,Tatuador")]` en `PUT api/citastatuaje/{id}` no impide que una cuenta `Tatuador` actualice la cita de **cualquier** tatuador, no solo las propias (ver `autenticacion/dudas-recurrentes.md`).
+- No hay endpoint ni mecanismo para crear una cuenta con rol `Tatuador` ni para revocar un JWT antes de su expiración (sin refresh token, sin logout) — ambos requieren intervención manual sobre la base o esperar a que el token expire.

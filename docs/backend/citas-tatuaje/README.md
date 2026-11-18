@@ -14,10 +14,12 @@ Agenda de citas de tatuaje: alta, listado con filtros, edición (reprogramar / c
 
 | Método | Ruta | Auth | Input | Output |
 |---|---|---|---|---|
-| GET | `api/citastatuaje?tatuadorId=&estado=` | Ninguna | query `tatuadorId` (int), `estado` (string exacto) | `200` `List<CitaTatuajeDto>` |
-| GET | `api/citastatuaje/{id}` | Ninguna | `id` | `200` `CitaTatuajeDto` / `404` |
-| POST | `api/citastatuaje` | Ninguna | `CitaTatuajeCrearDto` | `201` (`CreatedAtRoute`) / `400` / `404` (tatuador inexistente) / `409` (solapamiento) |
-| PUT | `api/citastatuaje/{id}` | Ninguna | `id`, `CitaTatuajeActualizarDto` | `204` / `400` / `404` / `409` |
-| DELETE | `api/citastatuaje/{id}` | Ninguna | `id` | `204` / `404` |
+| GET | `api/citastatuaje?tatuadorId=&estado=` | Autenticado (cualquier rol) | query `tatuadorId` (int), `estado` (string exacto) | `200` `List<CitaTatuajeDto>` |
+| GET | `api/citastatuaje/{id}` | Autenticado (cualquier rol) | `id` | `200` `CitaTatuajeDto` / `404` |
+| POST | `api/citastatuaje` | `Recepcionista` | `CitaTatuajeCrearDto` | `201` (`CreatedAtRoute`) / `400` / `404` (tatuador inexistente) / `409` (solapamiento) |
+| PUT | `api/citastatuaje/{id}` | `Recepcionista` o `Tatuador` | `id`, `CitaTatuajeActualizarDto` | `204` / `400` / `404` / `409` |
+| DELETE | `api/citastatuaje/{id}` | `Recepcionista` | `id` | `204` / `404` |
 
 A diferencia de `Tatuador`, `CitaTatuaje` no tiene baja lógica: `DELETE` borra la fila físicamente (no hay columna `Activo` en esta entidad).
+
+Autenticación/roles vienen de `[Authorize]` (clase) + `[Authorize(Roles = "...")]` (acciones de escritura) — ver [autenticacion](../autenticacion/). El `PUT` acepta `Recepcionista` **o** `Tatuador`, pero no hay verificación de que el `Tatuador` autenticado sea el dueño de esa cita puntual (ver `autenticacion/dudas-recurrentes.md`).

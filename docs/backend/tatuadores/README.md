@@ -14,9 +14,11 @@ Alta, listado, edición y baja lógica de los tatuadores del estudio; también e
 
 | Método | Ruta | Auth | Input | Output |
 |---|---|---|---|---|
-| GET | `api/tatuadores?especialidad=&activo=` | Ninguna | query `especialidad` (substring), `activo` (bool) | `200` `List<TatuadorDto>` |
-| GET | `api/tatuadores/{id}` | Ninguna | `id` | `200` `TatuadorDto` / `404` |
-| GET | `api/tatuadores/{tatuadorId}/citas` | Ninguna | `tatuadorId` | `200` `List<CitaTatuajeDto>` / `404` si el tatuador no existe |
-| POST | `api/tatuadores` | Ninguna | `TatuadorCrearDto` | `201` (`CreatedAtRoute`) `TatuadorDto` / `400` |
-| PUT | `api/tatuadores/{id}` | Ninguna | `id`, `TatuadorActualizarDto` | `204` / `400` / `404` / `409` |
-| DELETE | `api/tatuadores/{id}` | Ninguna | `id` | `204` / `404` / `409` |
+| GET | `api/tatuadores?especialidad=&activo=` | Autenticado (cualquier rol) | query `especialidad` (substring), `activo` (bool) | `200` `List<TatuadorDto>` |
+| GET | `api/tatuadores/{id}` | Autenticado (cualquier rol) | `id` | `200` `TatuadorDto` / `404` |
+| GET | `api/tatuadores/{tatuadorId}/citas` | Autenticado (cualquier rol) | `tatuadorId` | `200` `List<CitaTatuajeDto>` / `404` si el tatuador no existe |
+| POST | `api/tatuadores` | `Recepcionista` | `TatuadorCrearDto` | `201` (`CreatedAtRoute`) `TatuadorDto` / `400` |
+| PUT | `api/tatuadores/{id}` | `Recepcionista` | `id`, `TatuadorActualizarDto` | `204` / `400` / `404` / `409` |
+| DELETE | `api/tatuadores/{id}` | `Recepcionista` | `id` | `204` / `404` / `409` |
+
+Autenticación/roles vienen de `[Authorize]` (clase) + `[Authorize(Roles = "Recepcionista")]` (acciones de escritura) — ver [autenticacion](../autenticacion/).
